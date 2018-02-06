@@ -17,6 +17,27 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
+class NotificationStream:
+    def __init__(self):
+        self.message = ""
+        self.grades = []
+        self.tests = []
+
+    def add_grade(self, grade):
+        log.info("NotificationStream: Adding fresh grade")
+        self.grades.append(grade)
+
+    def add_test(self, test):
+        log.info("NotificationStream: Adding fresh test")
+        self.tests.append(test)
+
+    def send(self):
+        log.info("NotificationStream: sending notification")
+        print("New test results:", self.tests)
+        print("New grades:", self.grades)
+
+notification_stream = NotificationStream()
+
 class Credentials:
     def __init__(self, username, password):
         self.username = username
@@ -71,6 +92,14 @@ class DataController:
 
     def compare_grades(self, data):
         log.info("Initialize comparing grades for {}".format(self.hash))
+        current_data = []
+        with open(self.filename, 'r') as working_file:  
+            try:
+                current_data = json.load(working_file)
+                log.info("Fetching JSON successful")
+            except:
+                log.info("Fetching JSON failed")
+
         grades = []
         for element in data:
             element = {
@@ -79,9 +108,14 @@ class DataController:
                 'grade': element[2]
             }
             grades.append(element)
+        
+        for element in grades:
+            for old in current_data:
+                if old['course'] == element['course'] and old['semester'] == element['semester'] and old['grade'] != element['grade']:
+                    notification_stream.add_grade(element)
 
-        with open(self.filename, 'w') as outfile:  
-            json.dump(grades, outfile)
+        with open(self.filename, 'w') as working_file:  
+            json.dump(grades, working_file)
 
     def compare_tests(self, data):
         log.info("Initialize comparing tests for {}".format(self.hash))
@@ -105,8 +139,8 @@ class PageController:
         text = text.replace(")", ") ")
         for number in range(0, 10):
             text = text.replace(str(number), str(number) + " ")
-        text = text.replace(", ", ",")
         text = text.replace(" ,", ",")
+        text = text.replace(", ", ",")
         return text
 
     def grades_index(self):
@@ -138,6 +172,7 @@ class PageController:
             data.compare_grades(scraped_grades)
         except Exception as e:
             log.info("Scraping terminated, exception occured")
+            log.warn(repr(e))
 
     def perform(self):
         if "studia/sprawdziany/index" in self.url:
@@ -163,5 +198,7 @@ for url in urls_to_check:
         driver.get(url)
         action = PageController(url)
         action.perform()
+
+notification_stream.send()
 
 driver.quit()
