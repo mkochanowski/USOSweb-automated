@@ -67,7 +67,7 @@ class DataController:
         self.url = url
         url_encoded = url.encode('utf-8')
         self.hash = hashlib.md5(url_encoded).hexdigest()
-        self.filename = "{}/{}.txt".format(self.__data_directory, self.hash)
+        self.filename = "{}/{}.json".format(self.__data_directory, self.hash)
 
     def compare_grades(self, data):
         log.info("Initialize comparing grades for {}".format(self.hash))
@@ -80,7 +80,8 @@ class DataController:
             }
             grades.append(element)
 
-        json.dump(grades, self.filename)
+        with open(self.filename, 'w') as outfile:  
+            json.dump(grades, outfile)
 
     def compare_tests(self, data):
         log.info("Initialize comparing tests for {}".format(self.hash))
@@ -98,33 +99,45 @@ class PageController:
             log.info("Add a new url to queue")
             urls_to_check.append(link.get_attribute("href"))
 
+    def grades_column_beautify(self, text):
+        text = text.replace(":", ": ")
+        text = text.replace("(", " (")
+        text = text.replace(")", ") ")
+        for number in range(0, 10):
+            text = text.replace(str(number), str(number) + " ")
+        text = text.replace(", ", ",")
+        text = text.replace(" ,", ",")
+        return text
+
     def grades_index(self):
         log.info("Scrape index of grades")
-        # try:
-        scraped_grades = []
-        grades = driver.find_element_by_id("tab1")
-        soup = BeautifulSoup(grades.get_attribute("innerHTML"), "html.parser")
-        grades = soup.find_all('tr')
-        columns = soup.find_all('td')
-        index = 0
-        element = []
-        for column in columns:
-            content = column.text
-            content = content.replace("\n", " ")
-            content = re.sub(r'[\ \n]{2,}', '', content)
-            content = content.strip()
-            if index == 3: 
-                index = 0
-                scraped_grades.append(element)
-                element = []
-            else: 
-                index += 1
-                element.append(content)
+        try:
+            scraped_grades = []
+            grades = driver.find_element_by_id("tab1")
+            soup = BeautifulSoup(grades.get_attribute("innerHTML"), "html.parser")
+            grades = soup.find_all('tr')
+            columns = soup.find_all('td')
+            index = 0
+            element = []
+            for column in columns:
+                content = column.text
+                content = content.replace("\n", " ")
+                content = re.sub(r'[\ \n]{2,}', '', content)
+                if index == 2:
+                    content = self.grades_column_beautify(content)
+                content = content.strip()
+                if index == 3: 
+                    index = 0
+                    scraped_grades.append(element)
+                    element = []
+                else: 
+                    index += 1
+                    element.append(content)
 
-        data = DataController(self.url)
-        data.compare_grades(scraped_grades)
-    # except Exception as e:
-        log.info("Scraping terminated, exception occured")
+            data = DataController(self.url)
+            data.compare_grades(scraped_grades)
+        except Exception as e:
+            log.info("Scraping terminated, exception occured")
 
     def perform(self):
         if "studia/sprawdziany/index" in self.url:
