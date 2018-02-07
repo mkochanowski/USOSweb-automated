@@ -1,3 +1,8 @@
+data/
+.env
+oauth2_creds.json
+.vscode
+snippet_*
 
 # Created by https://www.gitignore.io/api/python
 
