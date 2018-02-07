@@ -1,21 +1,23 @@
-import browser
 import logging
 import sys
 import re
 import hashlib
 import json
 import config
+import yagmail
 from bs4 import BeautifulSoup
 
-driver = browser.driver()
+driver = config.driver()
 env = config.os.environ
+
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
-ch = logging.StreamHandler(sys.stdout)
-ch.setLevel(logging.INFO)
+
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch.setFormatter(formatter)
-log.addHandler(ch)
+stdout_handler.setFormatter(formatter)
+log.addHandler(stdout_handler)
 
 class NotificationStream:
     def __init__(self):
@@ -33,8 +35,20 @@ class NotificationStream:
 
     def send(self):
         log.info("NotificationStream: sending notification")
-        print("New test results:", self.tests)
-        print("New grades:", self.grades)
+        yag = yagmail.SMTP("askxememah@gmail.com", oauth2_file="oauth2_creds.json")
+        contents = "Skrypt wykrył, że zaszły następujące zmiany:<br/>"
+        if len(self.tests) > 0:
+            contents += "<br/><strong>Sprawdziany / punkty</strong><br/>"
+            for element in self.tests:
+                contents += "{}: <span style='color: red;'>{}</span>→<strong style='color: green;'>{}</strong><br/>".format(element['entry_name'], element['old_result'], element['result'])
+                if 'comment' in element:
+                    contents += '↳ <small><i>{}</i></small> <br/>'.format(element['comment'])
+        if len(self.grades) > 0:
+            contents += "<br/><strong>Oceny semestralne</strong><br/>"
+            for element in self.grades:
+                contents += "{}:<br/><small style='color: blue;'>{}</small><br/><br/>".format(element['course'], element['grade'])
+        if len(self.grades) > 0 or len(self.tests) > 0:
+            yag.send('uwr-usos@kochanow.ski', 'USOS: Powiadomienie o nowych wynikach', contents)
 
 notification_stream = NotificationStream()
 
@@ -91,14 +105,17 @@ class DataController:
         self.filename = "{}/{}.json".format(self.__data_directory, self.hash)
 
     def compare_grades(self, data):
-        log.info("Initialize comparing grades for {}".format(self.hash))
+        log.info("Initialize comparing grades for [{}]".format(self.hash))
         current_data = []
-        with open(self.filename, 'r') as working_file:  
-            try:
-                current_data = json.load(working_file)
-                log.info("Fetching JSON successful")
-            except:
-                log.info("Fetching JSON failed")
+        try:
+            with open(self.filename, 'r') as working_file:  
+                try:
+                    current_data = json.load(working_file)
+                    log.info("Fetching JSON successful")
+                except:
+                    log.info("Fetching JSON failed")
+        except IOError:
+            log.info("File does not exist")
 
         grades = []
         for element in data:
@@ -118,11 +135,77 @@ class DataController:
             json.dump(grades, working_file)
 
     def compare_tests(self, data):
-        log.info("Initialize comparing tests for {}".format(self.hash))
+        log.info("Initialize comparing tests for [{}]".format(self.hash))
+        current_data = []
+        try:
+            with open(self.filename, 'r') as working_file:  
+                try:
+                    current_data = json.load(working_file)
+                    log.info("Fetching JSON successful")
+                except:
+                    log.info("Fetching JSON failed")
+        except IOError:
+            log.info("File does not exist")
 
+        for element in data:
+            for old in current_data:
+                if old['entry_name'] == element['entry_name'] and old['unique_id'] == element['unique_id'] and old['result'] != element['result']:
+                    element['old_result'] = old['result']
+                    notification_stream.add_test(element)
+
+        with open(self.filename, 'w') as working_file:  
+            json.dump(data, working_file)
 class PageController:
     def __init__(self, url):
         self.url = url
+
+    def tests_single(self):
+        log.info("Scrape single test category")
+        try:
+            scraped_entries = []
+            tree = driver.find_element_by_id("drzewo")
+            soup = BeautifulSoup(tree.get_attribute("innerHTML"), "html.parser")
+            soup = soup.find_all("table")
+            unique_id = 100
+            for table in soup:
+                items = table.find_all("td")
+                new_element = {}
+                for item in items:
+                    title = item.contents[0].strip()
+                    if title:
+                        new_element['entry_name'] = title
+                    for i in item.contents:
+                        if i.name != None:
+                            if "Dodatkowy opis:" not in i.text and "- max" not in i.text and "Związane grupy" not in i.text and "korze" not in i.text and i.text and "- ocena" not in i.text:
+                                content = i.text
+                                content = re.sub(r'[\ \n]{2,}', '', content)
+                                # print(i.name, content)
+
+                                if i.name == 'b':
+                                    new_element['result'] = content
+                                if i.name == 'span' and 'pkt' in i.text and 'result' in new_element:
+                                    new_element['result'] += " pkt"
+                                if i.name == 'span' and 'brak' in i.text:
+                                    new_element['result'] = i.text
+
+                                if 'comment' in new_element:
+                                    new_element['comment'] += " " + i.text.strip()
+                                    if "Komentarz" in i.text:
+                                        new_element['comment'] += " Sprawdź na USOS"
+
+                                if "Wystawiający" in i.text:
+                                    new_element['comment'] = i.text
+                    
+                if new_element:
+                    new_element['unique_id'] = unique_id
+                    unique_id += 1
+                    scraped_entries.append(new_element)
+
+            data = DataController(self.url)
+            data.compare_tests(scraped_entries)
+        except Exception as e:
+            log.info("Scraping terminated, exception occured")
+            log.warn(repr(e))
 
     def tests_index(self):
         global urls_to_check
@@ -181,6 +264,9 @@ class PageController:
         elif "studia/oceny/index" in self.url:
             log.info("Index of grades opened")
             self.grades_index()
+        elif "studia/sprawdziany/pokaz" in self.url:
+            log.info("Single test opened")
+            self.tests_single()
         else:
             log.info("No action programmed for that url: {}".format(self.url))
 
