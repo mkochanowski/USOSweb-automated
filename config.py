@@ -9,7 +9,7 @@ if os.path.isfile('.env'):
     load_dotenv(dotenv_path)
 
 def driver():
-    if not os.environ['DRIVER_HEADLESS']:
+    if os.environ['DRIVER_HEADLESS'] == "False":
         options = webdriver.ChromeOptions() 
         options.add_argument("user-data-dir=C:\\Users\\Kochanowski\\AppData\\Local\\Google\\Chrome\\User Data\\Selenium")
         driver = webdriver.Chrome(chrome_options=options)

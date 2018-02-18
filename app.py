@@ -70,14 +70,16 @@ class NotificationStream:
         log.info("Template building complete")
 
     def send(self):
-        log.info("NotificationStream: sending notification")
-        yag = yagmail.SMTP("askxememah@gmail.com", oauth2_file="oauth2_creds.json")
-
-        self.build_mail_template()
-
+        log.info("NotificationStream: Check whether any changes have been made")
         if len(self.grades) > 0 or len(self.tests) > 0:
+            log.info("NotificationStream: sending notification")
+            yag = yagmail.SMTP("askxememah@gmail.com", oauth2_file="oauth2_creds.json")
+            
+            self.build_mail_template()
             yag.send('uwr-usos@kochanow.ski', 'USOS: Powiadomienie o nowych wynikach', self.message)
             log.info("E-mail notification sent")
+        else:
+            log.info("NotificationStream: No changes detected, terminating")
 
 notification_stream = NotificationStream()
 
