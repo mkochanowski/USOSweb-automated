@@ -33,22 +33,51 @@ class NotificationStream:
         log.info("NotificationStream: Adding fresh test")
         self.tests.append(test)
 
+    def comparison(self, old, new):
+        result_string = "<span style='color: red;'>{}</span>→<strong style='color: green;'>{}</strong>".format(old, new)
+        return result_string
+
+    def tests_summary(self, header):
+        log.info("Creating summary for tests")
+        
+        if len(self.tests) > 0:
+            self.message += "<br/><strong>{}</strong><br/>".format(header)
+            for element in self.tests:
+                self.message += "{}: {}<br/>".format(element['entry_name'], self.comparison(element['old_result'], element['result']))
+                if 'comment' in element:
+                    self.message += '↳ <small><i>{}</i></small> <br/>'.format(element['comment'])
+
+    def grades_summary(self, header):
+        log.info("Creating summary for grades")
+        
+        if len(self.grades) > 0:
+            self.message += "<br/><strong>{}</strong><br/>".format(header)
+            for element in self.grades:
+                self.message += "{}: {}<br/>".format(
+                    element['course'], 
+                    self.comparison(element['old_grade'], element['grade'])
+                )
+    
+    def build_mail_template(self):
+        log.info("Initializing template")
+
+        self.message = '<link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700&amp;subset=latin-ext" rel="stylesheet"><div style="font-family: \'Source Sans Pro\', sans-serif;">'
+        self.message += "Skrypt wykrył, że zaszły następujące zmiany:<br/>"
+        
+        self.tests_summary("Sprawdziany / punkty")
+        self.grades_summary("Oceny semestralne")
+        
+        log.info("Template building complete")
+
     def send(self):
         log.info("NotificationStream: sending notification")
         yag = yagmail.SMTP("askxememah@gmail.com", oauth2_file="oauth2_creds.json")
-        contents = "Skrypt wykrył, że zaszły następujące zmiany:<br/>"
-        if len(self.tests) > 0:
-            contents += "<br/><strong>Sprawdziany / punkty</strong><br/>"
-            for element in self.tests:
-                contents += "{}: <span style='color: red;'>{}</span>→<strong style='color: green;'>{}</strong><br/>".format(element['entry_name'], element['old_result'], element['result'])
-                if 'comment' in element:
-                    contents += '↳ <small><i>{}</i></small> <br/>'.format(element['comment'])
-        if len(self.grades) > 0:
-            contents += "<br/><strong>Oceny semestralne</strong><br/>"
-            for element in self.grades:
-                contents += "{}:<br/><small style='color: blue;'>{}</small><br/><br/>".format(element['course'], element['grade'])
+
+        self.build_mail_template()
+
         if len(self.grades) > 0 or len(self.tests) > 0:
-            yag.send('uwr-usos@kochanow.ski', 'USOS: Powiadomienie o nowych wynikach', contents)
+            yag.send('uwr-usos@kochanow.ski', 'USOS: Powiadomienie o nowych wynikach', self.message)
+            log.info("E-mail notification sent")
 
 notification_stream = NotificationStream()
 
@@ -129,6 +158,7 @@ class DataController:
         for element in grades:
             for old in current_data:
                 if old['course'] == element['course'] and old['semester'] == element['semester'] and old['grade'] != element['grade']:
+                    element['old_grade'] = old['grade']
                     notification_stream.add_grade(element)
 
         with open(self.filename, 'w') as working_file:  
