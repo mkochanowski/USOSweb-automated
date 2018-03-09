@@ -6,6 +6,7 @@ import json
 import config
 import yagmail
 import traceback
+import datetime
 from bs4 import BeautifulSoup
 
 driver = config.driver()
@@ -19,6 +20,14 @@ stdout_handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 stdout_handler.setFormatter(formatter)
 log.addHandler(stdout_handler)
+
+def exception_take_screenshot(codename):
+    log.info("Initializing taking screenshot from webdriver")
+    now = datetime.datetime.today()
+    date = now.strftime('%d-%m-%y-H%H')
+    filename = 'exception-{}-{}.png'.format(date, codename)
+    driver.save_screenshot("screenshots/" + filename)
+    log.info("Screenshot taken for `{}` as {}".format(codename, filename))
 
 class NotificationStream:
     def __init__(self):
@@ -296,6 +305,7 @@ class PageController:
             log.info("Scraping terminated, exception occured")
             log.warn(repr(e))
             log.warn(traceback.format_exc())
+            exception_take_screenshot("grades_index")
 
     def perform(self):
         if "studia/sprawdziany/index" in self.url:
