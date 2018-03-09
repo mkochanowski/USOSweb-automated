@@ -5,6 +5,7 @@ import hashlib
 import json
 import config
 import yagmail
+import traceback
 from bs4 import BeautifulSoup
 
 driver = config.driver()
@@ -181,9 +182,14 @@ class DataController:
 
         for element in data:
             for old in current_data:
-                if old['entry_name'] == element['entry_name'] and old['unique_id'] == element['unique_id'] and old['result'] != element['result']:
-                    element['old_result'] = old['result']
-                    notification_stream.add_test(element)
+                if old['entry_name'] == element['entry_name'] and old['unique_id'] == element['unique_id']:
+                    if "result" not in old:
+                        old['result'] = "(brak wyniku)"
+                    if "result" not in element:
+                        element['result'] = "(brak wyniku)"
+                    if old['result'] != element['result']:
+                        element['old_result'] = old['result']
+                        notification_stream.add_test(element)
 
         with open(self.filename, 'w') as working_file:  
             json.dump(data, working_file)
@@ -238,6 +244,7 @@ class PageController:
         except Exception as e:
             log.info("Scraping terminated, exception occured")
             log.warn(repr(e))
+            log.warn(traceback.format_exc())
 
     def tests_index(self):
         global urls_to_check
@@ -288,6 +295,7 @@ class PageController:
         except Exception as e:
             log.info("Scraping terminated, exception occured")
             log.warn(repr(e))
+            log.warn(traceback.format_exc())
 
     def perform(self):
         if "studia/sprawdziany/index" in self.url:
