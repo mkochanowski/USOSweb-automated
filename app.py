@@ -24,7 +24,7 @@ log.addHandler(stdout_handler)
 def exception_take_screenshot(codename):
     log.info("Initializing taking screenshot from webdriver")
     now = datetime.datetime.today()
-    date = now.strftime('%d-%m-%y-H%H')
+    date = now.strftime('%d-%m-%y')
     filename = 'exception-{}-{}.png'.format(date, codename)
     driver.save_screenshot("screenshots/" + filename)
     log.info("Screenshot taken for `{}` as {}".format(codename, filename))
@@ -254,6 +254,7 @@ class PageController:
             log.info("Scraping terminated, exception occured")
             log.warn(repr(e))
             log.warn(traceback.format_exc())
+            exception_take_screenshot("tests_single")
 
     def tests_index(self):
         global urls_to_check
