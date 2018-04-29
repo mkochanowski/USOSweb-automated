@@ -60,7 +60,7 @@ class Scraper:
             if link in self.visited:
                 logging.info(f"'{link}' has already been visited")
             else:
-                logging.info(f"Adding {link} to scraping queue")
+                logging.info(f"Adding '{link}' to scraping queue")
                 self.destinations.append(link)
 
     def _process_results_parsed(self, data: object) -> None:
@@ -70,8 +70,8 @@ class Scraper:
         if destination.startswith("http"):
             if destination.startswith(self.root_url):
                 new_destination = destination[len(self.root_url):]
-                logging.info(f"Destination {destination} normalized into "
-                             + new_destination)
+                logging.info(f"Destination '{destination}' normalized into "
+                             + f"'{new_destination}'")
                 destination = new_destination
             else:
                 logging.error(f"Normalizing url {destination} failed: "
