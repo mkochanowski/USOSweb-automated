@@ -25,18 +25,23 @@ class Authentication:
 
         if not self._is_username_present_in_topbar():
             try:
-                self.driver.find_element_by_link_text('zaloguj się').click()
-            except Exception:
+                self.driver.find_element_by_link_text(
+                    "zaloguj się").click()
+            except:
                 logging.exception("Login button could not be found")
 
-            self.driver.find_element_by_name(
-                "username").send_keys(self.username)
-            self.driver.find_element_by_name(
-                "password").send_keys(self.password)
-            self.driver.find_element_by_name("rememberMe").click()
-            self.driver.find_element_by_name("password").send_keys(u'\ue007')
+            try:
+                self.driver.find_element_by_name(
+                    "username").send_keys(self.username)
+                self.driver.find_element_by_name(
+                    "password").send_keys(self.password)
+                self.driver.find_element_by_name("rememberMe").click()
+                self.driver.find_element_by_name(
+                    "password").send_keys(u'\ue007')
 
-            logging.info("Login procedure finished")
+                logging.info("Login procedure finished")
+            except:
+                logging.exception("Credentials could not be entered")
         if self._is_username_present_in_topbar():
             self.user_authenticated = True
             return True
@@ -51,11 +56,16 @@ class Authentication:
             return self.sign_in()
 
     def _is_username_present_in_topbar(self) -> bool:
-        top_bar = self.driver.find_element_by_xpath(
-            '//*[@id="casmenu"]/table/tbody/tr/td[2]')
-        if "Zalogowany użytkownik:" in top_bar.text:
-            logging.debug("Username is present in the top bar")
-            self.authenticated = True
-            return True
-        self.authenticated = False
+        try:
+            top_bar = self.driver.find_element_by_xpath(
+                '//*[@id="casmenu"]/table/tbody/tr/td[2]')
+
+            if "Zalogowany użytkownik:" in top_bar.text:
+                logging.debug("Username is present in the top bar")
+                self.authenticated = True
+                return True
+            self.authenticated = False
+        except:
+            logging.exception("Top bar could not be located")
+
         return False
