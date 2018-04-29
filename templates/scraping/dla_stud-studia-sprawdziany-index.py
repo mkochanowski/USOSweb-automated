@@ -23,13 +23,13 @@ class ScrapingTemplate:
         return soup
 
     def _parse(self, soup: object) -> None:
-        helper = Helper(soup=soup, web_driver=self.driver)
+        parser = Parser(soup=soup, web_driver=self.driver)
         self.results = {
             "module": __name__,
-            "new_destinations": helper.get_destinations()
+            "new_destinations": parser.get_destinations()
         }
 
-class Helper:
+class Parser:
     def __init__(self, web_driver: object, soup: object) -> None:
         self.soup = soup
         self.driver = web_driver
