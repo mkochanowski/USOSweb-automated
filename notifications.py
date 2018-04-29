@@ -17,7 +17,9 @@ class Notification:
         return False
 
     def render_and_send(self) -> bool:
+        logging.info("Rendering the notifiation's template")
         self._render()
+        logging.info("Sending")
         return self.send()
 
     def _send(self) -> bool:
@@ -53,26 +55,22 @@ class WebPush(Notification):
 
 
 class Dispatcher:
-    def __init__(
-            self,
-            channels: str,
-            enable: bool) -> None:
-
+    def __init__(self, channels: str, enable: bool) -> None:
         self.channels: list = channels.split(" ")
         self.enable: bool = enable
+        self.data: object = None #FIXME
 
     def send(self) -> bool:
+        logging.info("Preparing dispatcher")
         for channel in self.channels:
             self.send_single(channel)
 
         return True
 
-    def send_single(
-            self,
-            channel: str) -> bool:
-            
+    def send_single(self, channel: str) -> bool:
         if self.enable:
-            stream = eval(channel + "()")
+            stream = eval(channel + "(data=self.data)")
+            logging.info(f"Sending notifications via {channel}")
             return stream.render_and_send()
 
         return False
