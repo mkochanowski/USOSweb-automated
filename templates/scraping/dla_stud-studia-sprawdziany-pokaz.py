@@ -46,7 +46,7 @@ class Parser:
         tree = tree.find("div", id=True, recursive=False)
         self._parse_tree(tree)
 
-        logging.info(self.results)
+        logging.debug(self.results)
         return self.results
 
     def _parse_groups(self, soup: object) -> None:
@@ -64,22 +64,28 @@ class Parser:
         
         return columns[1].contents[0].strip()
 
+    def _strip_cell(self, cell: str) -> str:
+        cell = cell.replace("\n", " ")
+        cell = " ".join(cell.split())
+        return cell
+
     def _parse_single_table(self, table: object,
                             hierarchy: str) -> dict:
         table = table.find("tr")
         columns = table.find_all("td")
+        logging.debug(columns)
         title = columns[1].contents[0].strip()
-        grade = columns[2].span.text
+        grade = self._strip_cell(columns[2].text)
         values = [grade]
-
-        if len(columns) > 3:
-            comment = columns[3].text
-            values.append(comment)
+        
+        if (len(columns) > 3 
+                and "pokaż szczegóły" not in columns[3].text):
+            values.append(self._strip_cell(columns[3].text))
 
         self._tree_entries.append({
             "group": self._group,
             "subgroup": self._subgroup,
-            "hierarchy": hierarchy,
+            "hierarchy": hierarchy[2:],
             "item": title,
             "values": values
         })
@@ -94,14 +100,15 @@ class Parser:
 
         subtrees = tree.find_all("div", id=True, recursive=False)
         for index, subtree in enumerate(subtrees):
-            expanded_hierarchy = "{}/{}".format(hierarchy, titles[index])
+            expanded_hierarchy = "{}/{}".format(
+                hierarchy, titles[index])
             self._parse_subtree_recursively(
                 subtree, expanded_hierarchy)
 
     def _parse_tree(self, tree: object) -> None:
         self._parse_subtree_recursively(tree, ".")
 
-        self._populate_results("tests-results-tree", self._tree_entries)
+        self._populate_results("course-results-tree", self._tree_entries)
 
     def _populate_results(self, entity: str, entries: list) -> list:
         self.results.append({

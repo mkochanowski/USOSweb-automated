@@ -12,6 +12,7 @@ class ScrapingTemplate:
     def get_data(self) -> object:
         self._parse(soup=self._soup())
 
+        logging.debug(self.results)
         return self.results
 
     def _soup(self) -> object:
