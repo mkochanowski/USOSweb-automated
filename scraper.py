@@ -8,13 +8,13 @@ logging = logging.getLogger(__name__)
 
 class Scraper:
     def __init__(self, root_url: str, destinations: str,
-                 authentication: object, dispatcher: object,
+                 authentication: object, data_controller: object,
                  web_driver: object) -> None:
         self.root_url = root_url
         self.destinations = destinations.split(" ")
         self.visited = []
         self.authentication = authentication
-        self.dispatcher = dispatcher
+        self.data_controller = data_controller
         self.driver = web_driver
 
     def run(self) -> None:
@@ -46,8 +46,10 @@ class Scraper:
         if data is not None:
 
             if "new_destinations" in data:
-                logging.info("New destinations detected in the data package")
-                self._process_results_destinations(data["new_destinations"])
+                logging.info("New destinations detected in the data"
+                             + "package")
+                self._process_results_destinations(
+                    data["new_destinations"])
 
             if "parsed_results" in data:
                 logging.info("Results detected in the data package")
@@ -63,15 +65,18 @@ class Scraper:
                 logging.info(f"Adding '{link}' to scraping queue")
                 self.destinations.append(link)
 
-    def _process_results_parsed(self, data: object) -> None:
-        pass
+    def _process_results_parsed(self, data: list) -> None:
+        if len(data) == 1:
+            data = data[0]
+
+        self.data_controller.upload(data)
 
     def _normalize_destination_url(self, destination: str) -> str:
         if destination.startswith("http"):
             if destination.startswith(self.root_url):
                 new_destination = destination[len(self.root_url):]
-                logging.info(f"Destination '{destination}' normalized into "
-                             + f"'{new_destination}'")
+                logging.debug(f"Destination '{destination}' normalized "
+                             + f"into '{new_destination}'")
                 destination = new_destination
             else:
                 logging.error(f"Normalizing url {destination} failed: "
