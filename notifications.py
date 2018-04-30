@@ -3,10 +3,31 @@ import logging
 logging = logging.getLogger(__name__)
 
 
+class Dispatcher:
+    def __init__(self, channels: str, enable: bool) -> None:
+        self.channels: list = channels.split(" ")
+        self.enable: bool = enable
+
+    def send(self, data: dict) -> bool:
+        logging.info("Preparing dispatcher")
+        for channel in self.channels:
+            self.send_single(channel, data)
+
+        return True
+
+    def send_single(self, channel: str, data: dict) -> bool:
+        if self.enable:
+            stream = eval(channel + "(data=data)")
+            logging.info(f"Sending notifications via {channel}")
+            return stream.render_and_send()
+
+        return False
+
+
 class Notification:
-    def __init__(self, data: object) -> None:
+    def __init__(self, data: dict) -> None:
         self._rendered_template: str = None
-        self.data: object = data
+        self.data: dict = data
 
     def template_output(self) -> str:
         return self._rendered_template
@@ -52,25 +73,3 @@ class WebPush(Notification):
 
     def _render(self) -> None:
         pass
-
-
-class Dispatcher:
-    def __init__(self, channels: str, enable: bool) -> None:
-        self.channels: list = channels.split(" ")
-        self.enable: bool = enable
-        self.data: object = None #FIXME
-
-    def send(self) -> bool:
-        logging.info("Preparing dispatcher")
-        for channel in self.channels:
-            self.send_single(channel)
-
-        return True
-
-    def send_single(self, channel: str) -> bool:
-        if self.enable:
-            stream = eval(channel + "(data=self.data)")
-            logging.info(f"Sending notifications via {channel}")
-            return stream.render_and_send()
-
-        return False

@@ -18,12 +18,33 @@ def load_environmental_variables() -> None:
             dirname(__file__), '.env')
         load_dotenv(dotenv_path)
 
+def load_logging_setup(debug_mode: bool) -> None:
+    with open('logging.yaml', 'r') as stream:
+        config = yaml.load(stream)
+
+    logging.config.dictConfig(config)
+    
+    log_level = 'INFO'
+    if debug_mode:
+        log_level = 'DEBUG'
+
+    coloredlogs.install(
+        fmt=config["formatters"]["simple"]["format"],
+        level=log_level)
+
+    selenium_logger = 'selenium.webdriver.remote.remote_connection'
+    selenium_logger = logging.getLogger(selenium_logger)
+    selenium_logger.setLevel(logging.ERROR)
+
 
 def main() -> None:
     load_environmental_variables()
+    
+    load_logging_setup(
+        debug_mode=os.environ['USOS_SCRAPER_DEBUG_MODE'])
 
     web_driver = SeleniumDriver(
-        headless=False).get_instance()
+        headless=os.environ['USOS_SCRAPER_WEBDRIVER_HEADLESS']).get_instance()
 
     credentials = Credentials(
         username=os.environ['USOS_SETTINGS_USERNAME'],
@@ -52,17 +73,6 @@ def main() -> None:
     scraper.run()
     data.analyze()
 
+
 if __name__ == "__main__":
-
-    with open('logging.yaml', 'r') as stream:
-        config = yaml.load(stream)
-
-    logging.config.dictConfig(config)
-    coloredlogs.install(
-        fmt=config["formatters"]["simple"]["format"])
-
-    selenium_logger = 'selenium.webdriver.remote.remote_connection'
-    selenium_logger = logging.getLogger(selenium_logger)
-    selenium_logger.setLevel(logging.ERROR)
-
     main()

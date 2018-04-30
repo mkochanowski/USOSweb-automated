@@ -73,7 +73,6 @@ class Parser:
                             hierarchy: str) -> dict:
         table = table.find("tr")
         columns = table.find_all("td")
-        logging.debug(columns)
         title = columns[1].contents[0].strip()
         grade = self._strip_cell(columns[2].text)
         values = [grade]

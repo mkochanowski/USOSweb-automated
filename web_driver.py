@@ -15,7 +15,8 @@ class SeleniumDriver:
 
     def reset(self) -> None:
         logging.info("Resetting the webdriver instance")
-
+        logging.debug(f"Headless? {self.headless}\n"
+                      + f"Config: {self.config}")
         self._driver = None
 
     def get_instance(self) -> object:
@@ -32,13 +33,13 @@ class SeleniumDriver:
 
     def exception_take_screenshot(self, codename: str) -> None:
         logging.info("Initializing taking screenshot from webdriver")
-        
+
         now = datetime.datetime.today()
         date: str = now.strftime('%d-%m-%y')
         filename: str = f"exception-{date}-{codename}.png"
-        
+
         self._driver.save_screenshot("data/screenshots/" + filename)
-        
+
         logging.info(f"Screenshot taken for `{codename}` as {filename}")
 
     def quit(self) -> None:
@@ -58,7 +59,7 @@ class SeleniumDriver:
 
     def _driver_chrome(self) -> None:
         logging.info("Creating new Chrome Driver")
-        
+
         options = webdriver.ChromeOptions()
         options.add_argument("--log-level=5")
         options.add_argument("--disable-extensions")
