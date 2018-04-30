@@ -27,21 +27,12 @@ class Authentication:
             try:
                 self.driver.find_element_by_link_text(
                     "zaloguj się").click()
+                
+                self._perform_login()
+                
             except:
                 logging.exception("Login button could not be found")
 
-            try:
-                self.driver.find_element_by_name(
-                    "username").send_keys(self.username)
-                self.driver.find_element_by_name(
-                    "password").send_keys(self.password)
-                self.driver.find_element_by_name("rememberMe").click()
-                self.driver.find_element_by_name(
-                    "password").send_keys(u'\ue007')
-
-                logging.info("Login procedure finished")
-            except:
-                logging.exception("Credentials could not be entered")
         if self._is_username_present_in_topbar():
             self.user_authenticated = True
             return True
@@ -54,6 +45,20 @@ class Authentication:
         else:
             logging.info("First authorization")
             return self.sign_in()
+
+    def _perform_login(self) -> None:
+        try:
+            self.driver.find_element_by_name(
+                "username").send_keys(self.username)
+            self.driver.find_element_by_name(
+                "password").send_keys(self.password)
+            self.driver.find_element_by_name("rememberMe").click()
+            self.driver.find_element_by_name(
+                "password").send_keys(u'\ue007')
+
+            logging.info("Login procedure finished")
+        except:
+            logging.exception("Credentials could not be entered")
 
     def _is_username_present_in_topbar(self) -> bool:
         try:
