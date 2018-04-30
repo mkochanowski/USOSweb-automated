@@ -2,21 +2,15 @@ import os
 import yaml
 import logging
 import logging.config
+import coloredlogs
 from os.path import join, dirname
 from dotenv import load_dotenv
 from authentication import Authentication, Credentials
+from data import DataController
 from web_driver import SeleniumDriver
 from notifications import Dispatcher
 from scraper import Scraper
 
-with open('logging.yaml', 'r') as stream:
-    config = yaml.load(stream)
-
-logging.config.dictConfig(config)
-
-selenium_logger = 'selenium.webdriver.remote.remote_connection'
-selenium_logger = logging.getLogger(selenium_logger)
-selenium_logger.setLevel(logging.ERROR)
 
 def load_environmental_variables() -> None:
     if os.path.isfile('.env'):
@@ -44,14 +38,31 @@ def main() -> None:
         channels=os.environ['USOS_NOTIFICATIONS_STREAMS'],
         enable=os.environ['USOS_NOTIFICATIONS_ENABLE'])
 
+    data = DataController(
+        dispatcher=notifications_dispatcher
+    )
+
     scraper = Scraper(
         root_url=os.environ['USOS_SCRAPER_ROOT_URL'],
         destinations=os.environ['USOS_SCRAPER_DESTINATIONS'],
         authentication=authentication,
-        dispatcher=notifications_dispatcher,
+        data_controller=data,
         web_driver=web_driver)
 
     scraper.run()
+    data.analyze()
 
 if __name__ == "__main__":
+
+    with open('logging.yaml', 'r') as stream:
+        config = yaml.load(stream)
+
+    logging.config.dictConfig(config)
+    coloredlogs.install(
+        fmt=config["formatters"]["simple"]["format"])
+
+    selenium_logger = 'selenium.webdriver.remote.remote_connection'
+    selenium_logger = logging.getLogger(selenium_logger)
+    selenium_logger.setLevel(logging.ERROR)
+
     main()
