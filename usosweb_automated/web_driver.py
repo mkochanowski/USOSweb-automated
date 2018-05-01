@@ -15,7 +15,7 @@ class SeleniumDriver:
 
     def reset(self) -> None:
         logging.info("Resetting the webdriver instance")
-        logging.debug(f"Headless? {self.headless}\n"
+        logging.debug(f"Headless? {self.headless} "
                       + f"Config: {self.config}")
         self._driver = None
 

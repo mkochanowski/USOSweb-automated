@@ -5,11 +5,11 @@ import logging.config
 import coloredlogs
 from os.path import join, dirname
 from dotenv import load_dotenv
-from authentication import Authentication, Credentials
-from data import DataController
-from web_driver import SeleniumDriver
-from notifications import Dispatcher
-from scraper import Scraper
+from usosweb_automated.authentication import Authentication, Credentials
+from usosweb_automated.data import DataController
+from usosweb_automated.web_driver import SeleniumDriver
+from usosweb_automated.notifications import Dispatcher
+from usosweb_automated.scraper import Scraper
 
 
 def load_environmental_variables() -> None:
@@ -57,11 +57,11 @@ def main() -> None:
 
     notifications_dispatcher = Dispatcher(
         channels=os.environ['USOS_NOTIFICATIONS_STREAMS'],
-        enable=os.environ['USOS_NOTIFICATIONS_ENABLE'])
+        enable=os.environ['USOS_NOTIFICATIONS_ENABLE'],
+        config_file=os.environ['USOS_NOTIFICATIONS_CONFIG_FILE'])
 
     data = DataController(
-        dispatcher=notifications_dispatcher
-    )
+        dispatcher=notifications_dispatcher)
 
     scraper = Scraper(
         root_url=os.environ['USOS_SCRAPER_ROOT_URL'],

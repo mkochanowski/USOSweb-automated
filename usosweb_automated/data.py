@@ -23,8 +23,12 @@ class DataController:
                 self._analyze_single(entity=entity)
 
         self._save("data/compared.json", self.results)
-        self.dispatcher.send(self.results)
-
+        if self.results:
+            logging.info("Changes detected, passing onto dispatcher")
+            self.dispatcher.send(self.results)
+        else:
+            logging.info("No changes have been detected")
+            
     def _get_filename(self, data: dict) -> str:
         filename = "data/exception.json"
 
@@ -90,9 +94,9 @@ class DataController:
                     results.append(entry)
                     logging.debug(f"Detected change: {entry}")
                     break
-                elif index == len(old) - 1:
-                    results.append(item_new)
-                    logging.debug(f"New item found: {item_new}")
+                # elif index == len(old) - 1:
+                #     results.append(item_new)
+                #     logging.debug(f"New item found: {item_new}")
 
         return results
 
@@ -102,13 +106,16 @@ class DataController:
                 and old["entity"] == new["entity"]):
             entity_name = new["entity"]
             logging.info(f"Comparing results of entity '{entity_name}'")
-            self.results.append({
+            entry = {
                 "entity": new["entity"],
                 "items": self._compare_items(
                     old["items"], new["items"]),
-            })
+            }
+            if entry["items"]:
+                self.results.append(entry)
         elif ("entity" not in old and "entity" in new):
-            self.results.append(new)
+            if "items" in new and new["items"]:
+                self.results.append(new)
         else:
             logging.info(f"old: {old}\nnew: {new}")
             logging.error("Entity passed for comparison with incorrect type")
