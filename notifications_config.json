@@ -1,0 +1,13 @@
+{
+	"Email": {
+		"mail_sender": "example@gmail.com",
+		"mail_recipient": "example@example.com",
+		"mail_subject": "USOSweb: Changes have been detected"
+	},
+	"SMS": {
+		"API_KEY": ""
+	},
+	"WebPush": {
+		"API_KEY": ""
+	}
+}

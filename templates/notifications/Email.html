@@ -1,0 +1,54 @@
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600&amp;subset=latin-ext" rel="stylesheet">
+<div style="font-family: 'Open Sans', sans-serif;">
+{%- macro entity_elementy_start(header, subheader="") -%}
+<div style="margin-top: 4px; border: 1px solid #cfcfcf; box-shadow: 0px 5px 5px #f0f0f0; border-radius: 6px; padding: 8px; padding-top: 0px; padding-bottom: 0px;">
+    <div style="font-size: 18px; font-weight: 700;">{{ header }}</div>
+    <div style="font-size: 12px; font-weight: 300;">Kod przedmiotu: {{ subheader }}</div>
+{%- endmacro -%}
+{% set entity_elementy_stop %}
+</div>
+{% endset %}
+{% macro format_values(element) %}
+    {%- set old_values = [] -%}
+    {%- if "old_values" in element -%}
+        {%- set old_values = element["old_values"] -%}
+    {%- endif -%}
+    {%- for new_value in element["values"] -%}
+        {%- if old_values|length > loop.index0 and old_values[loop.index0] != new_value -%}
+            <span style="font-size: 14px; color: red;">
+                {{- old_values[loop.index0] -}}
+            </span><span style="font-size: 18px;">&nbsp; &#8594; &nbsp;</span>
+        {%- endif -%}
+            <span style="font-size: 14px; color: green">{{ new_value -}}</span><br>
+    {%- endfor -%}
+{%- endmacro -%}
+{% macro tr(index) %}
+    {% if index % 2 == 0 %}
+        <tr style="background-color: #f0f0f0; font-size: 16px;">
+    {% else %}
+        <tr style="background-color: #fcfcfc; font-size: 16px;">
+    {% endif %}
+{% endmacro %}
+{% set table %}<table cellpadding="8px" cellspacing="0">{% endset %}
+{%- for entity in data -%}
+    {% if entity["entity"] == "final-grades" -%}
+        {% for element in entity["items"] -%}
+            {{- entity_elementy_start(element["item"], element["subgroup"]) }}
+                <div>
+                    <div style="font-size: 14px;">Oceny semestralne</div>
+                    {{- format_values(element) }}
+                </div>
+            {{- entity_elementy_stop }}
+        {% endfor %}
+    {% elif entity["entity"] == "course-results-tree" %}
+        {{- entity_elementy_start(entity["items"][0]["subgroup"], entity["items"][0]["group"]) }}
+        {% for element in entity["items"] %}
+            <span style="font-size: 10px; font-weight: 300;"> {{ element["hierarchy"] }}</span><br><span style="font-size: 14px;">{{ element["item"] }}</span>
+            <div style="font-size: 12px;">{{- format_values(element) }}</div>
+        {% endfor %}
+    {{ entity_elementy_stop -}}
+    {% else %}
+
+    {% endif %}
+{% endfor %}
+</div>
