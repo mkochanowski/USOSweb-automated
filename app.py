@@ -12,18 +12,25 @@ from usosweb_automated.notifications import Dispatcher
 from usosweb_automated.scraper import Scraper
 
 
-def load_environmental_variables() -> None:
+def load_environmental_variables() -> bool:
     if os.path.isfile('.env'):
         dotenv_path = join(
             dirname(__file__), '.env')
         load_dotenv(dotenv_path)
+        return True
+    else:
+        logging.error("Oops! Did you forget to setup your .env file? "
+                      + "You can use the included .env.sample as a "
+                      + "starting point for your configuration.")
+        return False
+
 
 def load_logging_setup(debug_mode: bool) -> None:
     with open('logging.yaml', 'r') as stream:
         config = yaml.load(stream)
 
     logging.config.dictConfig(config)
-    
+
     log_level = 'INFO'
     if debug_mode:
         log_level = 'DEBUG'
@@ -38,8 +45,7 @@ def load_logging_setup(debug_mode: bool) -> None:
 
 
 def main() -> None:
-    load_environmental_variables()
-    
+
     load_logging_setup(
         debug_mode=os.environ['USOS_SCRAPER_DEBUG_MODE'])
 
@@ -75,4 +81,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    if load_environmental_variables():
+        main()
