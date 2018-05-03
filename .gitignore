@@ -5,5 +5,7 @@ logs/
 
 .env
 .vscode/
+docs/_build
 oauth2_creds.json
 snippet_*
+*.swp
