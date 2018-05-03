@@ -15,8 +15,8 @@ class SeleniumDriver:
 
     def reset(self) -> None:
         logging.info("Resetting the webdriver instance")
-        logging.debug(f"Headless? {self.headless} "
-                      + f"Config: {self.config}")
+        logging.debug("Headless? {} Config: {}".format(
+            self.headless, self.config))
         self._driver = None
 
     def get_instance(self) -> object:
@@ -35,12 +35,13 @@ class SeleniumDriver:
         logging.info("Initializing taking screenshot from webdriver")
 
         now = datetime.datetime.today()
-        date: str = now.strftime('%d-%m-%y')
-        filename: str = f"exception-{date}-{codename}.png"
+        date = now.strftime('%d-%m-%y')
+        filename = "exception-{}-{}.png".format(date, codename)
 
         self._driver.save_screenshot("data/screenshots/" + filename)
 
-        logging.info(f"Screenshot taken for `{codename}` as {filename}")
+        logging.info("Screenshot taken for `{}` as {}".format(
+            codename, filename))
 
     def quit(self) -> None:
         logging.info("Forcing the webdriver to quit")
@@ -50,8 +51,8 @@ class SeleniumDriver:
     def _driver_phantomjs(self) -> None:
         logging.info("Creating new PhantomJS Driver")
 
-        dir_path: str = os.path.dirname(os.path.realpath(__file__))
-        driver_path: str = dir_path + '/phantomjs'
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        driver_path = dir_path + '/phantomjs'
         driver = webdriver.PhantomJS(executable_path=driver_path)
         driver.set_window_size(1120, 550)
 

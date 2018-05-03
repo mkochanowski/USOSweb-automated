@@ -5,11 +5,11 @@ import logging.config
 import coloredlogs
 from os.path import join, dirname
 from dotenv import load_dotenv
-from usosweb_automated.authentication import Authentication, Credentials
-from usosweb_automated.data import DataController
-from usosweb_automated.web_driver import SeleniumDriver
-from usosweb_automated.notifications import Dispatcher
-from usosweb_automated.scraper import Scraper
+from usos.authentication import Authentication, Credentials
+from usos.data import DataController
+from usos.web_driver import SeleniumDriver
+from usos.notifications import Dispatcher
+from usos.scraper import Scraper
 
 
 def load_environmental_variables() -> bool:

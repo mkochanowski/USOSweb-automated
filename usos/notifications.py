@@ -11,8 +11,8 @@ logging = logging.getLogger(__name__)
 class Dispatcher:
     def __init__(self, channels: str, enable: bool,
                  config_file: str) -> None:
-        self.channels: list = channels.split(" ")
-        self.enable: bool = enable
+        self.channels = channels.split(" ")
+        self.enable = enable
         self.config = self._load_config(config_file)
 
     def send(self, data: dict) -> bool:
@@ -26,7 +26,7 @@ class Dispatcher:
         if self.enable:
             stream = getattr(sys.modules[__name__], channel)(
                 data=data, config=self.config[channel])
-            logging.info(f"Sending notifications via {channel}")
+            logging.info("Sending notifications via {}".format(channel))
             return stream.render_and_send()
 
         return False
@@ -38,20 +38,20 @@ class Dispatcher:
             try:
                 with open(filename, 'r') as working_file:
                     data = json.load(working_file)
-                    logging.info(f"'{filename}' - json fetched "
+                    logging.info("'{}' - json fetched ".format(filename)
                                  + "correctly")
             except IOError:
-                logging.exception(f"Config file '{filename}' could "
-                                  + "not be opened")
+                logging.exception("Config file '{}' ".format(filename)
+                                  + "could not be opened")
 
         return data
 
 
 class Notification:
     def __init__(self, data: dict, config: dict = {}) -> None:
-        self.data: dict = data
-        self.config: dict = config
-        self._rendered_template: str = None
+        self.data = data
+        self.config = config
+        self._rendered_template = None
 
     def template_output(self) -> str:
         return self._rendered_template
@@ -82,14 +82,14 @@ class Email(Notification):
                 self.config["mail_recipient"],
                 self.config["mail_subject"],
                 self._rendered_template)
-        
-        logging.info(f"Sending mail status: {status}")
-        
-        return True #FIXME
+
+        logging.info("Sending mail status: {}".format(status))
+
+        return True # FIXME
 
     def _render(self) -> None:
         env = Environment(
-            loader=FileSystemLoader('templates/notifications'), 
+            loader=FileSystemLoader('templates/notifications'),
             lstrip_blocks=True,
             trim_blocks=True)
         template = env.get_template('Email.html')

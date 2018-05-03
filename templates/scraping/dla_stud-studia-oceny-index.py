@@ -55,7 +55,8 @@ class Parser:
             grades = []
 
             for grade in columns[2].find_all("div"):
-                grades.append(f"{grade.a.text}: {grade.span.text}")
+                grades.append(
+                    "{}: {}".format(grade.a.text, grade.span.text))
 
             entries.append({
                 "group": semester,

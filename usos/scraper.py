@@ -31,7 +31,8 @@ class Scraper:
         self.driver.quit()
 
     def go_to(self, destination: str) -> None:
-        logging.info(f"Going to the destination: '{destination}'")
+        logging.info("Going to the destination: '{}'".format(
+            destination))
         destination = self._normalize_destination_url(destination)
         self.visited.append(destination)
 
@@ -41,7 +42,7 @@ class Scraper:
 
     def _process_results(self, data: object) -> None:
         logging.info("Processing results initialized")
-        logging.debug(f"Data: {data}")
+        logging.debug("Data: {}".format(data))
 
         if data is not None:
 
@@ -60,9 +61,11 @@ class Scraper:
             link = self._normalize_destination_url(link)
 
             if link in self.visited:
-                logging.info(f"'{link}' has already been visited")
+                logging.info(
+                    "'{}' has already been visited".format(link))
             else:
-                logging.info(f"Adding '{link}' to scraping queue")
+                logging.info(
+                    "Adding '{}' to the scraping queue".format(link))
                 self.destinations.append(link)
 
     def _process_results_parsed(self, data: list) -> None:
@@ -75,36 +78,38 @@ class Scraper:
         if destination.startswith("http"):
             if destination.startswith(self.root_url):
                 new_destination = destination[len(self.root_url):]
-                logging.debug(f"Destination '{destination}' normalized "
-                             + f"into '{new_destination}'")
+                logging.debug(
+                    "Destination '{}' normalized into '{}'".format(
+                        destination, new_destination))
                 destination = new_destination
             else:
-                logging.error(f"Normalizing url {destination} failed: "
-                              + "no rule has been set")
+                logging.error("Normalizing url '{}'".format(destination)
+                              + " has failed: no rule has been set")
         return destination
 
     def _perform(self, destination: str) -> None:
-        logging.info(f"Performing the scraping of '{destination}'")
+        logging.info(
+            "Performing the scraping of '{}'".format(destination))
 
-        scraping_template: object = self._detect(destination)
-        data: object = None
+        scraping_template = self._detect(destination)
+        data = None
 
         if scraping_template is not None:
             data = scraping_template.get_data()
 
-        logging.debug(f"Retrieved data: {data}")
+        logging.debug("Retrieved data: {}".format(data))
 
         self._process_results(data)
 
     def _detect(self, destination: str) -> object:
-        destination: str = destination.replace("/", "-")
+        destination = destination.replace("/", "-")
         parameter = destination.find("&")
 
         if parameter >= 0:
             destination = destination[:parameter]
 
         module = ".".join(["templates", "scraping", destination])
-        logging.debug(f"Looking for '{destination}' class")
+        logging.debug("Looking for '{}' class".format(destination))
 
         return self._import(module=module)
 
@@ -112,11 +117,11 @@ class Scraper:
         spec = importlib.util.find_spec(module)
 
         if spec is None:
-            logging.error(f"'{module}' template not found")
+            logging.error("'{}' template not found".format(module))
 
             return None
         else:
-            logging.info(f"'{module}' template file found")
+            logging.info("'{}' template file found".format(module))
             imported = importlib.import_module(module)
 
             logging.debug(

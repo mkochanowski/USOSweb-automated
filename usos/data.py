@@ -13,7 +13,7 @@ class DataController:
         self.results = []
         self._data = []
 
-    def upload(self, item: object) -> None:
+    def upload(self, item: dict) -> None:
         self._data.append(item)
 
     def analyze(self) -> None:
@@ -28,7 +28,7 @@ class DataController:
             self.dispatcher.send(self.results)
         else:
             logging.info("No changes have been detected")
-            
+
     def _get_filename(self, data: dict) -> str:
         filename = "data/exception.json"
 
@@ -38,28 +38,30 @@ class DataController:
 
             elif data["entity"] == "course-results-tree":
                 group = data["items"][0]["group"].lower()
-                filename = f"data/courses/{group}.json"
+                filename = "data/courses/{}.json".format(group)
 
         return filename
 
     def _load(self, filename: str) -> dict:
-        logging.info(f"Loading entity from '{filename}'")
+        logging.info("Loading entity from '{}'".format(filename))
         data = []
         if os.path.isfile(filename):
             try:
                 with open(filename, 'r') as working_file:
                     data = json.load(working_file)
-                    logging.info(f"'{filename}' - json fetched correctly")
+                    logging.info("'{}'".format(filename)
+                                 + "- json fetched correctly")
             except IOError:
                 logging.exception("File could not be opened")
             except:
-                logging.exception(
-                    f"'{filename}' - fetching json failed for some reasone")
+                logging.exception("'{}'".format(filename)
+                                  + "- fetching json failed "
+                                  + "for unknown reason")
 
         return data
 
     def _save(self, filename: str, entity: dict) -> None:
-        logging.info(f"Saving entity to '{filename}'")
+        logging.info("Saving entity to '{}'".format(filename))
         with open(filename, 'w') as working_file:
             json.dump(entity, working_file)
 
@@ -92,7 +94,7 @@ class DataController:
                     entry = copy.copy(item_new)
                     entry["old_values"] = item_old["values"]
                     results.append(entry)
-                    logging.debug(f"Detected change: {entry}")
+                    logging.debug("Detected change: {}".format(entry))
                     break
                 # elif index == len(old) - 1:
                 #     results.append(item_new)
@@ -105,7 +107,8 @@ class DataController:
                 and "entity" in new
                 and old["entity"] == new["entity"]):
             entity_name = new["entity"]
-            logging.info(f"Comparing results of entity '{entity_name}'")
+            logging.info("Comparing results of entity "
+                         + "'{}'".format(entity_name))
             entry = {
                 "entity": new["entity"],
                 "items": self._compare_items(
@@ -117,5 +120,6 @@ class DataController:
             if "items" in new and new["items"]:
                 self.results.append(new)
         else:
-            logging.info(f"old: {old}\nnew: {new}")
-            logging.error("Entity passed for comparison with incorrect type")
+            logging.debug("Old: {}\nNew: {}".format(old, new))
+            logging.error("Entity passed for comparison with "
+                          + "incorrect type")
