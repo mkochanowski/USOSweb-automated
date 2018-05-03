@@ -1,6 +1,5 @@
 import os
 import logging
-from typing import Dict
 from selenium import webdriver
 from datetime import datetime
 
@@ -8,18 +7,41 @@ logging = logging.getLogger(__name__)
 
 
 class SeleniumDriver:
-    def __init__(self, headless: bool, config: Dict = {}) -> None:
+    """Provides a layer of abstraction to obtain a preconfigured object 
+        of a Selenium-compatible web driver.
+        
+        :param headless: whether the driver should run in headless mode
+        :param config: set of config variables to tweak the behaviour of
+            the web driver"""
+
+    def __init__(self, headless: bool, config: dict = {}) -> None:
         self.headless = headless
         self.config = config
         self._driver = None
 
     def reset(self) -> None:
+        """Resets the instance of a web driver to ``None``. 
+        
+        This method might prove useful while switching between 
+        different web drivers.
+        """
         logging.info("Resetting the webdriver instance")
         logging.debug("Headless? {} Config: {}".format(
             self.headless, self.config))
         self._driver = None
 
     def get_instance(self) -> object:
+        """Returns an instance of selected web driver.
+        
+        Changing the implementation of this method will allow you to 
+        integrate different web drivers and replace *Chrome* (the 
+        default) with *Firefox*, *PhantomJS* or something else.
+        
+        To find out more, read :ref:`CustomWebDriver`.
+
+        :returns: by default - an object of ChromeDriver. Can be 
+            extended.
+        """
         self.reset()
 
         # if self.headless:
@@ -32,6 +54,22 @@ class SeleniumDriver:
         return self._driver
 
     def exception_take_screenshot(self, codename: str) -> None:
+        """Takes a screenshot of web driver's current viewport.
+        
+        This method can be utilized as a tool for troubleshooting
+        non-trivial errors with parsing. ::
+
+            def perform-login-example(self, usr: str, pwd: str) -> object:
+                try:
+                    ...
+                    return get_user_instance(usr, pwd)
+                except:
+                    driver.exception_take_screenshot("perform-login")
+                    logging.exception("Could not retrieve user instance")
+
+        :param codename: name of the exception/event that will be added
+            to the image's filename
+        """
         logging.info("Initializing taking screenshot from webdriver")
 
         now = datetime.datetime.today()
@@ -44,11 +82,13 @@ class SeleniumDriver:
             codename, filename))
 
     def quit(self) -> None:
+        """Forces the web driver to terminate."""
         logging.info("Forcing the webdriver to quit")
 
         self._driver.quit()
 
     def _driver_phantomjs(self) -> None:
+        """Adds PhantomJS WebDriver support."""
         logging.info("Creating new PhantomJS Driver")
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -59,6 +99,7 @@ class SeleniumDriver:
         self._driver = driver
 
     def _driver_chrome(self) -> None:
+        """Adds ChromeDriver support."""
         logging.info("Creating new Chrome Driver")
 
         options = webdriver.ChromeOptions()
