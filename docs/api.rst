@@ -1,8 +1,8 @@
 Full API Reference
 ==================
 
-Authenticating the user
------------------------
+Authenticating user(s)
+----------------------
 
 .. autoclass:: usos.authentication.Credentials
 
@@ -15,7 +15,6 @@ Managing web drivers
 .. automodule:: usos.web_driver
     :members:
     :undoc-members:
-    :show-inheritance:
 
 Retrieving data
 ---------------
@@ -23,20 +22,21 @@ Retrieving data
 .. automodule:: usos.scraper
     :members:
     :undoc-members:
-    :show-inheritance:
 
-Storing and analysing data
---------------------------
+Storing and analysing the data
+------------------------------
 
 .. automodule:: usos.data
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :private-members: _get_filename
 
 Dispatching notifications
 -------------------------
 
-.. automodule:: usos.notifications
+.. autoclass:: usos.notifications.Dispatcher
     :members:
     :undoc-members:
-    :show-inheritance:
+
+.. autoclass:: usos.notifications.Notification
+    :members:
+    :undoc-members:

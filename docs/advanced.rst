@@ -4,6 +4,11 @@ Extending the functionality
 Scraping
 --------
 
+.. _CustomWebDriver:
+
+Implementing a custom web driver
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Writing custom ScrapingTemplates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
