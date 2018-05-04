@@ -21,9 +21,12 @@ Writing custom ScrapingTemplates
 Notifications
 -------------
 
+.. _CustomNotificationsTemplates:
+
 Designing new templates
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _CustomNotificationsStreams:
 
-Implementing additional Streams
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Implementing additional Streams (channels)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
