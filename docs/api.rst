@@ -1,5 +1,5 @@
-Full API Reference
-==================
+API Reference
+=============
 
 Authenticating user(s)
 ----------------------
@@ -28,7 +28,7 @@ Storing and analysing the data
 
 .. automodule:: usos.data
     :members:
-    :private-members: _get_filename
+    :private-members:
 
 Dispatching notifications
 -------------------------

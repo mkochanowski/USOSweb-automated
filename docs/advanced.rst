@@ -9,6 +9,11 @@ Scraping
 Implementing a custom web driver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _CustomEntity:
+
+Defining new entities
+~~~~~~~~~~~~~~~~~~~~~
+
 Writing custom ScrapingTemplates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
