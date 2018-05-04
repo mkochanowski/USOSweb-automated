@@ -65,7 +65,7 @@ class Authentication:
         """Performs the sign in procedure using a ``web_driver`` provided 
         to the initializer.
 
-        :returns: whether the procedure was successful.
+        :returns: ``True`` if the procedure was successful.
         """
         logging.info("Initializing login procedure")
 

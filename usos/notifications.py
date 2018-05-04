@@ -9,8 +9,9 @@ logging = logging.getLogger(__name__)
 
 
 class Dispatcher:
-    """Manages the 
-    ::
+    """Allows for sending multiple messages via configured channels. 
+    
+    Creating a new dispatcher that operates on selected channels::
 
         from usos.notifications import Dispatcher
 
