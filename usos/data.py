@@ -7,6 +7,9 @@ import hashlib
 logging = logging.getLogger(__name__)
 
 
+class NotAnEntity(Exception):
+    """An item is not in an entity-compatible format."""
+
 class DataController:
     """Stores and performs analysis of collected data.
 
@@ -87,7 +90,11 @@ class DataController:
 
         :param item: item in an **entity-compatible** format.
         """
-        self._data.append(item)
+        if "entity" in item and "items" in item:
+            self._data.append(item)
+        elif item:
+            raise NotAnEntity(
+                "Given item {} is not an entity".format(item))
 
     def analyze(self) -> None:
         """Analyzes the data stored in the temporary storage and passes 
@@ -132,7 +139,7 @@ class DataController:
 
 
         :returns: filename of the json file for a given entity."""
-        filename = "data/exception.json"
+        filename = "data/not-defined.json"
 
         if "entity" in data:
             if data["entity"] == "final-grades":
@@ -175,6 +182,11 @@ class DataController:
         :param data: data to store.
         """
         logging.info("Saving entity to '{}'".format(filename))
+        
+        dirname = os.path.dirname(filename)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
         with open(filename, 'w') as working_file:
             json.dump(data, working_file)
 
@@ -183,7 +195,6 @@ class DataController:
         old = self._load(filename)
 
         self._compare(old, entity)
-
         self._save(filename, entity)
 
     def _same_item(self, old: dict, new: dict) -> bool:
@@ -295,3 +306,4 @@ class DataController:
             logging.debug("Old: {}\nNew: {}".format(old, new))
             logging.error("Entity passed for comparison with "
                           + "incorrect type")
+
