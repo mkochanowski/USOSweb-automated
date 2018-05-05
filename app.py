@@ -12,10 +12,15 @@ from usos.notifications import Dispatcher
 from usos.scraper import Scraper
 
 
-def load_environmental_variables() -> bool:
-    if os.path.isfile('.env'):
+def load_environmental_variables(file) -> bool:
+    """Populates the environment with variables from a .env file.
+    
+    :param file: path to the file with environmental variables.
+    :returns: ``True`` if variables have been successfuly loaded.
+    """
+    if os.path.isfile(file):
         dotenv_path = join(
-            dirname(__file__), '.env')
+            dirname(__file__), file)
         load_dotenv(dotenv_path)
         return True
     else:
@@ -24,8 +29,25 @@ def load_environmental_variables() -> bool:
                       + "starting point for your configuration.")
         return False
 
+def check_required_dirs() -> bool:
+    """Checks whether the required directories were created."""
+    required = ["data", "logs"]
+    for directory in required:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    return True
 
 def load_logging_setup(debug_mode: bool) -> None:
+    """Initializes the logging configuration with pretty-printing for 
+    console users.
+    
+    This method does not replace the configuration of the logging.yaml 
+    file.
+
+    :param debug_mode: whether to include DEBUG statements in the 
+        console output.
+    """
     with open('logging.yaml', 'r') as stream:
         config = yaml.load(stream)
 
@@ -45,12 +67,13 @@ def load_logging_setup(debug_mode: bool) -> None:
 
 
 def main() -> None:
-
+    """Runs the scraper with configuration fetched from the .env file."""
     load_logging_setup(
-        debug_mode=os.environ['USOS_SCRAPER_DEBUG_MODE'])
+        debug_mode=(os.environ['USOS_SCRAPER_DEBUG_MODE'] == "True"))
 
     web_driver = SeleniumDriver(
-        headless=os.environ['USOS_SCRAPER_WEBDRIVER_HEADLESS']).get_instance()
+        headless=(os.environ['USOS_SCRAPER_WEBDRIVER_HEADLESS'] == "True"))
+    web_driver = web_driver.get_instance()
 
     credentials = Credentials(
         username=os.environ['USOS_SETTINGS_USERNAME'],
@@ -63,7 +86,7 @@ def main() -> None:
 
     notifications_dispatcher = Dispatcher(
         channels=os.environ['USOS_NOTIFICATIONS_STREAMS'],
-        enable=os.environ['USOS_NOTIFICATIONS_ENABLE'],
+        enable=(os.environ['USOS_NOTIFICATIONS_ENABLE'] == "True"),
         config_file=os.environ['USOS_NOTIFICATIONS_CONFIG_FILE'])
 
     data = DataController(
@@ -81,5 +104,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    if load_environmental_variables():
+    if load_environmental_variables('.env') and check_required_dirs():
         main()
