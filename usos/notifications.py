@@ -55,8 +55,14 @@ class Dispatcher:
             successfuly on a given channel.
         """
         if self.enable:
+            try:
+                channel_config = self.config[channel]
+            except KeyError:
+                channel_config = {}
+                logging.exception("No configuration detected for {}".format(channel))
+            
             stream = getattr(sys.modules[__name__], channel)(
-                data=data, config=self.config[channel])
+                data=data, config=channel_config)
             logging.info("Sending notifications via {}".format(channel))
             return stream.render_and_send()
 
