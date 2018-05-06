@@ -1,4 +1,4 @@
 #!/bin/bash
-cd /home/kch/usos-notifications
+cd /home/username/USOSweb-automated
 source venv/bin/activate
 python3 app.py
