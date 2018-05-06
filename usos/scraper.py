@@ -7,6 +7,17 @@ logging = logging.getLogger(__name__)
 
 
 class Scraper:
+    """Navigates the interface scrapes the data.
+    
+    :param root_url: a root url for the USOSweb interface.
+    :param destinations: 
+    :param authentication: an instance of 
+        :class:`usos.authentication.Authentication` for accessing 
+        protected data.
+    :param data_controller: a controller for storing and analysing 
+        scraped data.
+    :param web_driver: a Selenium web driver instance for navigating.
+    """
     def __init__(self, root_url: str, destinations: str,
                  authentication: object, data_controller: object,
                  web_driver: object) -> None:
@@ -18,6 +29,7 @@ class Scraper:
         self.driver = web_driver
 
     def run(self) -> None:
+        """Runs the process of iterating through provided destinations."""
         logging.info("Launching the scraper")
 
         for destination in self.destinations:
@@ -26,11 +38,17 @@ class Scraper:
         self.quit()
 
     def quit(self) -> None:
+        """Terminates the scraper."""
         logging.info("Terminating the scraper")
 
         self.driver.quit()
 
     def go_to(self, destination: str) -> None:
+        """Navigates to the provided destination.
+        
+        :param destination: a part of the url that will be used to match 
+            the ScrapingTemplate.
+        """
         logging.info("Going to the destination: '{}'".format(
             destination))
         destination = self._normalize_destination_url(destination)
@@ -40,12 +58,18 @@ class Scraper:
             self.driver.get(''.join([self.root_url, destination]))
             self._perform(destination)
 
-    def _process_results(self, data: object) -> None:
+    def _process_results(self, data: dict) -> None:
+        """Processes data returned from ScrapingTemplates.
+        
+        If the data includes these keys:
+        ``new_destinations`` - adds new destinations to the scraper queue.
+        ``parsed_results`` - uploads the data for later analysis.
+        :param data: data passed from a ScrapingTemplate.
+        """
         logging.info("Processing results initialized")
         logging.debug("Data: {}".format(data))
 
         if data is not None:
-
             if "new_destinations" in data:
                 logging.info("New destinations detected in the data"
                              + "package")
@@ -56,7 +80,12 @@ class Scraper:
                 logging.info("Results detected in the data package")
                 self._process_results_parsed(data["parsed_results"])
 
-    def _process_results_destinations(self, data: object) -> None:
+    def _process_results_destinations(self, data: list) -> None:
+        """Adds new, unvisited destinations to the scraper queue from the 
+        ScrapingTemplate results.
+        
+        :param data: destinations excluded from results dict.
+        """
         for link in data:
             link = self._normalize_destination_url(link)
 
@@ -69,12 +98,22 @@ class Scraper:
                 self.destinations.append(link)
 
     def _process_results_parsed(self, data: list) -> None:
-        if len(data) == 1:
-            data = data[0]
+        """Uploads parsed results to the data controller.
+        
+        :param data: entites sent from a ScrapingTemplate.
+        """
 
-        self.data_controller.upload(data)
+        if len(data) == 1:
+            self.data_controller.upload(data[0])
+        else:
+            self.data_controller.upload_multiple(data)
 
     def _normalize_destination_url(self, destination: str) -> str:
+        """Translates url into a scraper-compatible destination.
+        
+        :param destination: a full url inside of a USOSweb application.
+        :returns: a destination.
+        """
         if destination.startswith("http"):
             if destination.startswith(self.root_url):
                 new_destination = destination[len(self.root_url):]
@@ -88,6 +127,10 @@ class Scraper:
         return destination
 
     def _perform(self, destination: str) -> None:
+        """Performs the scraping and parsing of a given destination.
+
+        :param destination: scraper-compatible destination path.
+        """
         logging.info(
             "Performing the scraping of '{}'".format(destination))
 
@@ -102,6 +145,11 @@ class Scraper:
         self._process_results(data)
 
     def _detect(self, destination: str) -> object:
+        """Detects the template to import based on a given destination. 
+        
+        :param destination: scraper-compatible destination path.
+        :returns: an imported ScrapingTemplate.
+        """
         destination = destination.replace("/", "-")
         parameter = destination.find("&")
 
@@ -114,6 +162,11 @@ class Scraper:
         return self._import(module=module)
 
     def _import(self, module: str) -> object:
+        """Provides a requested ScrapingTemplate.
+        
+        :param module: a name of ScrapingTemplate to import.
+        :returns: an imported ScrapingTemplate.
+        """
         spec = importlib.util.find_spec(module)
 
         if spec is None:
