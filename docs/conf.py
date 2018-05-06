@@ -85,7 +85,32 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'logo_name': 'USOSweb Automated',
+    'description': 'An automation tool built for lovely people.',
+    'github_user': 'mkochanowski',
+    'github_repo': 'USOSweb-automated',
+    'github_type': 'star',
+    'github_count': False,
+    'fixed_sidebar': True,
+    'show_related': True,
+    'travis_button': False,
+    'github_button': True,
+    'sidebar_width': '280px',
+    'page_width': '1120px',
+}
+
+html_logo = '_static/logo100.png'
+
+html_sidebars = {
+    '**': [
+        'about.html',
+        'navigation.html',
+        'relations.html',
+        'sourcelink.html',
+        'searchbox.html',
+    ]
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
