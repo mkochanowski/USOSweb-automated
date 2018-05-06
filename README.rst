@@ -255,7 +255,7 @@ This is how a minimal template looks like:
 
             return self.results
 
-The only requirement for the ``ScraperTemplate`` is to implement the ``get_data()`` method so that it returns a dictionary with a ``module`` key, such as:
+The only requirement for the ``ScrapingTemplate`` is to implement the ``get_data()`` method so that it returns a dictionary with a ``module`` key, such as:
 
 .. code-block:: python
 
@@ -267,8 +267,8 @@ The only requirement for the ``ScraperTemplate`` is to implement the ``get_data(
 
 **Available keys:**
 
-| ``new_destinations`` key will allow you to pass some URLs back to the scraper for building up the queue of crawling.
-| ``parsed_results`` data saved in a form of a list of entities. 
+| ``new_destinations`` - URLs to pass back to the scraper for building up the queue of crawling.
+| ``parsed_results`` - data saved in a form of a list of entities. 
 
 Using custom web drivers
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -294,6 +294,7 @@ You can add more drivers in  ``usos/web_driver.py``. Here is an example of a cus
 | Important: your method should set the ``self._driver`` attribute to point to the instance of the driver.
 | Now, you can add additional logic to how the drivers are chosen. 
 | Let's say, we want the ``PhantomJS`` driver to launch only in debug mode, and ``ChromeDriver`` on our production server.
+| 
 
 .. code-block:: python
 
