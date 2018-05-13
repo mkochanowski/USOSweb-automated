@@ -317,7 +317,7 @@ Defining new entities
     | Honestly, operating on dictionaries instead of a dedicated class feels a little weird for such an important element.
 
 | An ``Entity`` is a dictionary structure that contains two keys: ``entity`` and ``items``.
-| Think about it not only as a data type, but also as an abstraction tak defines its *purpose*.
+| Think about it not only as a data type, but also as an abstraction that defines its *purpose*.
 
 For example:  
 
