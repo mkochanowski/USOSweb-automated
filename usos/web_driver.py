@@ -28,6 +28,10 @@ class SeleniumDriver:
         logging.info("Resetting the webdriver instance")
         logging.debug("Headless? {} Config: {}".format(
             self.headless, self.config))
+        
+        if self._driver:
+            self.quit()
+
         self._driver = None
 
     def get_instance(self) -> object:
@@ -92,7 +96,7 @@ class SeleniumDriver:
         logging.info("Creating new PhantomJS Driver")
 
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        driver_path = dir_path + '/phantomjs'
+        driver_path = dir_path + '/../phantomjs'
         driver = webdriver.PhantomJS(executable_path=driver_path)
         driver.set_window_size(1120, 550)
 
