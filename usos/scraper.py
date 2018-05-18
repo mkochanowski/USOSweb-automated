@@ -7,7 +7,7 @@ logging = logging.getLogger(__name__)
 
 
 class Scraper:
-    """Navigates the interface scrapes the data.
+    """Navigates the interface and scrapes the data.
     
     :param root_url: a root url for the USOSweb interface.
     :param destinations: 
@@ -138,11 +138,14 @@ class Scraper:
         data = None
 
         if scraping_template is not None:
-            data = scraping_template.get_data()
-
+            try:
+                data = scraping_template.get_data()
+                self._process_results(data)
+            except:
+                logging.exception("Execution of a ScrapingTemplate has failed")
+        
         logging.debug("Retrieved data: {}".format(data))
 
-        self._process_results(data)
 
     def _detect(self, destination: str) -> object:
         """Detects the template to import based on a given destination. 
