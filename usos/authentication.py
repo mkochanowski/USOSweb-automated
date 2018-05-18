@@ -69,7 +69,7 @@ class Authentication:
         """
         logging.info("Initializing login procedure")
 
-        self.driver.get(self.root_url)
+        self.driver.get(self.root_url + "&lang=pl")
 
         if not self._is_username_present_in_topbar():
             try:
@@ -80,6 +80,7 @@ class Authentication:
 
             except:
                 logging.exception("Login button could not be found")
+                self.driver.quit()
 
         if self._is_username_present_in_topbar():
             self.user_authenticated = True
@@ -125,6 +126,7 @@ class Authentication:
             logging.info("Login procedure finished")
         except:
             logging.exception("Credentials could not be entered")
+            self.driver.quit()
 
     def _is_username_present_in_topbar(self) -> bool:
         """Checks whether the username is present in the top bar of 
@@ -138,8 +140,10 @@ class Authentication:
                 logging.debug("Username is present in the top bar")
                 self.authenticated = True
                 return True
+                
             self.authenticated = False
         except:
             logging.exception("Top bar could not be located")
+            self.driver.quit()
 
         return False
