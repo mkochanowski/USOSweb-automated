@@ -79,7 +79,8 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'kochanowski-theme'
+html_theme_path = ['.']
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -92,12 +93,15 @@ html_theme_options = {
     'github_repo': 'USOSweb-automated',
     'github_type': 'star',
     'github_count': False,
-    'fixed_sidebar': True,
+    'fixed_sidebar': False,
     'show_related': True,
     'travis_button': False,
     'github_button': True,
     'sidebar_width': '280px',
     'page_width': '1120px',
+    'font_family': '"Source Sans Pro", sans-serif',
+    'head_font_family': '"Poppins", sans-serif',
+    'analytics_id': 'UA-42750788-11',
 }
 
 html_logo = '_static/logo100.png'

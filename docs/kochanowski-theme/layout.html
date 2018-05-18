@@ -1,0 +1,167 @@
+{%- extends "basic/layout.html" %}
+
+{%- block extrahead %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ pathto('_static/custom.css', 1) }}" type="text/css" />
+  {% if theme_touch_icon %}
+    <link rel="apple-touch-icon" href="{{ pathto('_static/' ~ theme_touch_icon, 1) }}" />
+  {% endif %}
+  {% if theme_canonical_url %}
+    <link rel="canonical" href="{{ theme_canonical_url }}{{ pagename }}.html"/>
+  {% endif %}
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  <link href="https://kochanow.ski/favicon.ico" rel="shortcut icon" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:600,700|Source+Sans+Pro:300, 400,400i,600,700,900&amp;subset=latin-ext" rel="stylesheet">
+  <link rel="stylesheet" href="https://kochanow.ski/assets/css/flexboxgrid.min.css">
+  <link rel="stylesheet" href="https://kochanow.ski/assets/css/burger.css">
+  <link rel="stylesheet" href="https://kochanow.ski/assets/css/shared.css">
+{% endblock %}
+
+{# top+bottom related navs; we also have our own in sidebar #}
+{%- macro rellink_markup() %}
+  <nav id="rellinks">
+    <ul>
+      {%- if prev %}
+        <li>
+          &larr;
+          <a href="{{ prev.link|e }}" title="Previous document">{{ prev.title }}</a>
+        </li>
+      {%- endif %}
+      {%- if next %}
+        <li>
+          <a href="{{ next.link|e }}" title="Next document">{{ next.title }}</a>
+          &rarr;
+        </li>
+      {%- endif %}
+    </ul>
+  </nav>
+{%- endmacro %}
+
+{%- set theme_show_relbar_top = theme_show_relbar_top or theme_show_relbars %}
+{%- set theme_show_relbar_bottom = theme_show_relbar_bottom or theme_show_relbars %}
+
+
+{# removed existing top+bottom related nav, and embed in main content #}
+{%- block relbar1 %}{% endblock %}
+{%- block relbar2 %}{% endblock %}
+
+{# Nav should appear before content, not after #}
+{%- block content %}
+  <div class="show-mobile">
+    <div class="mobile-menu-background">
+      <div class="container navbar-flex" style="background-color: #000;">
+        <div class="navbar-logo"><a class="navbar-logo-click" href="/"><img src="https://kochanow.ski/assets/img/kch_logo_white-flatten.svg" class="navbar-logo-size" alt="Kochanowski"></a>
+        </div>
+        <div class="navbar-menu">
+          <a class="mobile-navbar-item" style="color: #fff;" onclick="closeMenu()">MENU</a>
+        </div>
+      </div>
+      <div class="mobile-menu-list">
+        <div class="container">
+          <div class="row middle-xs">
+          <a class="mobile-menu-list-link col-sm-12 col-xs-12 text-center" href="https://docs.kochanow.ski/">docs</a>
+          <a class="mobile-menu-list-link col-sm-12 col-xs-12 text-center" href="https://kochanow.ski/portfolio/">portfolio</a>
+          <a class="mobile-menu-list-link col-sm-12 col-xs-12 text-center" href="https://kochanow.ski/contact/">contact</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+	<nav class="navbar">
+		<div class="container navbar-flex">
+			<div class="navbar-logo"><a class="navbar-logo-click" href="/"><img src="https://kochanow.ski/assets/img/kch_logo_black-flatten.svg" class="navbar-logo-size" alt="Kochanowski"></a>
+			</div>
+			<div class="navbar-menu">
+			<span class="show-mobile"><a class="mobile-navbar-item" style="color: #222;" onclick="openMenu()">MENU</a></span><a class="navbar-hide-mobile navbar-item navbar-item-active" href="https://docs.kochanow.ski/">docs</a><a class="navbar-hide-mobile navbar-item" href="https://kochanow.ski/portfolio/">portfolio</a><a class="navbar-hide-mobile navbar-item" href="https://kochanow.ski/contact/">contact</a>
+			</div>
+		</div>
+	</nav>
+  <div class="container">
+{%- if theme_fixed_sidebar|lower == 'true' %}
+  <div class="document">
+    {{ sidebar() }}
+    {%- block document %}
+      <div class="documentwrapper">
+      {%- if render_sidebar %}
+        <div class="bodywrapper">
+      {%- endif %}
+
+          {%- block relbar_top %}
+            {%- if theme_show_relbar_top|tobool %}
+              <div class="related top">
+                &nbsp;
+                {{- rellink_markup () }}
+              </div>
+            {%- endif %}
+          {% endblock %}
+
+          <div class="body" role="main">
+            {% block body %} {% endblock %}
+          </div>
+
+          {%- block relbar_bottom %}
+            {%- if theme_show_relbar_bottom|tobool %}
+              <div class="related bottom">
+                &nbsp;
+                {{- rellink_markup () }}
+              </div>
+            {%- endif %}
+          {% endblock %}
+
+      {%- if render_sidebar %}
+        </div>
+      {%- endif %}
+      </div>
+    {%- endblock %}
+    <div class="clearer"></div>
+  </div>
+{%- else %}
+{{ super() }}
+{%- endif %}
+  </div>
+{%- endblock %}
+
+{%- block footer %}
+  <footer>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-6 col-sm-6 col-xs-12 footer-menu">
+					<a class="footer-link" href="https://docs.kochanow.ski/"><strong>docs</strong></a>
+					<a class="footer-link" href="https://kochanow.ski/portfolio/">portfolio</a>
+					<a class="footer-link" href="https://kochanow.ski/contact/">contact</a>
+				</div>
+				<div class="col-md-6 col-sm-6 col-xs-12 footer-additional">
+					© 2018 Designed by <strong>Marek Kochanowski</strong>
+				</div>
+			</div>
+		</div>
+	</footer>
+
+  <script src="https://kochanow.ski/assets/js/jquery.min.js"></script>
+	<script src="https://kochanow.ski/assets/js/burger.js"></script>
+
+    {% if theme_github_banner|lower != 'false' %}
+    <a href="https://github.com/{{ theme_github_user }}/{{ theme_github_repo }}" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="{{ pathto('_static/' ~ theme_github_banner, 1) if theme_github_banner|lower != 'true' else 'https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png' }}" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    {% endif %}
+
+    {% if theme_analytics_id %}
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', '{{ theme_analytics_id }}']);
+      _gaq.push(['_setDomainName', 'none']);
+      _gaq.push(['_setAllowLinker', true]);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
+    {% endif %}
+{%- endblock %}
