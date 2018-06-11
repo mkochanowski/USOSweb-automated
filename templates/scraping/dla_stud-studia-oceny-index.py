@@ -63,8 +63,10 @@ class Parser:
             grades = []
 
             for grade in columns[2].find_all("div"):
+                grade_title = grade.a.text if grade.a else "(brak)"
+                grade_value = grade.span.text if grade.span else "(brak)"
                 grades.append(
-                    "{}: {}".format(grade.a.text, grade.span.text))
+                    "{}: {}".format(grade_title, grade_value))
 
             entries.append({
                 "group": semester,

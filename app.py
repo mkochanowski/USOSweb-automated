@@ -3,6 +3,7 @@ import yaml
 import logging
 import logging.config
 import coloredlogs
+
 from os.path import join, dirname
 from dotenv import load_dotenv
 from usos.authentication import Authentication, Credentials
